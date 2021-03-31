@@ -13,17 +13,20 @@ public class GamePanel extends JPanel implements ActionListener {
     static final int SCREEN_HEIGHT = 600;
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
-    static final int DELAY = 75;
+    static final int DELAY = 50;
+    static final int BLOCK_WIDTH = 40;
+    static final int BLOCK_HEIGHT = 25;
     final int shipX[] = new int[GAME_UNITS];
     final int shipY[] = new int[GAME_UNITS];
     int ballX = UNIT_SIZE * 6;
     int ballY = SCREEN_WIDTH - UNIT_SIZE * 2;
-    int shipSize = 4;
+    int shipSize = 25;
     int wallsBroken;
     int collisions = 0;
     int gradientX = 1;
     int gradientY = -1;
-    int BALL_UNIT = 30;
+    int BALL_UNIT = 20;
+    int time = 0;
     LinkedList<Block> blocks = new LinkedList<>();
     boolean running = false;
     char direction = 'R';
@@ -54,38 +57,61 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void draw(Graphics g) {
-
         for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
             g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
             g.drawLine(0, i * UNIT_SIZE, SCREEN_WIDTH, i * UNIT_SIZE);
         }
-
+//
         for (int i = 0; i < shipSize; i++) {
             g.setColor(Color.BLUE);
             g.fillRect(shipX[i] + UNIT_SIZE, SCREEN_WIDTH - UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
         }
         if (running) {
-            g.setColor(Color.red);
+            g.setColor(Color.BLACK);
             for (Block block : blocks){
-                g.fillRect(block.blockX,0,40,25);
+                switch (block.type){
+                    case 1:
+                        g.setColor(Color.cyan);
+                        break;
+                    case 2:
+                        g.setColor(Color.magenta);
+                        break;
+                    case 3:
+                        g.setColor(Color.YELLOW);
+                        break;
+                    case 4:
+                        g.setColor(Color.white);
+                        break;
+                    case 5:
+                        g.setColor(Color.RED);
+                        break;
+                }
+                g.fillRect(block.blockX,block.blockY,40,25);
             }
-
             g.drawLine(0, SCREEN_WIDTH - UNIT_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH - UNIT_SIZE);
             g.setColor(Color.white);
             g.fillOval(ballX, ballY, UNIT_SIZE, UNIT_SIZE);
+        } else {
+            g.setColor(Color.red);
+            g.setFont(Font.getFont(Font.SANS_SERIF));
+
+            g.drawString("Game Over",250,300);
+
         }
     }
 
 
     public void newRowBlocks(){
-        for (int i = 0; i < SCREEN_WIDTH/UNIT_SIZE/2; i++) {
+        for (int i = 0; i < 1; i++) {
             blocks.add(new Block(i*UNIT_SIZE*2,0));
+            blocks.add(new Block(i*UNIT_SIZE*2,BLOCK_HEIGHT*2));
+            blocks.add(new Block(i*UNIT_SIZE*2,BLOCK_HEIGHT*4));
+
         }
     }
 
     public void moveBall() {
-        ballX += gradientX * BALL_UNIT;
-        ballY += gradientY * BALL_UNIT;
+
         int max = 0;
         int min = 600;
         for (int i = 0; i < shipSize; i++) {
@@ -97,11 +123,18 @@ public class GamePanel extends JPanel implements ActionListener {
         }
         int i = 0;
         for (Block block : blocks){
-            System.out.println(block.blockX - 20 + " " + ballX);
-            if (40 == ballY && block.blockX - 20 <= ballX && block.blockX + 20 >= ballX){
-                gradientY = 1;
-                blocks.remove(block);
-                System.out.println(i);
+            if (block.blockY + BALL_UNIT >= ballY && ballY >= block.blockY  && block.blockX - BALL_UNIT <= ballX && block.blockX + BALL_UNIT >= ballX){
+                System.out.println(ballY + " " + block.blockY);
+                if (ballY <= block.blockY){
+                    gradientY = -1;
+                } else {
+                    gradientY = 1;
+                }
+                if (block.type == 2){
+                    block.type = 1;
+                } else {
+                    blocks.remove(block);
+                }
                 break;
             }
         }
@@ -116,16 +149,10 @@ public class GamePanel extends JPanel implements ActionListener {
             gradientY = 1;
         }
         if (ballY >= SCREEN_HEIGHT) {
-            System.exit(0);
+            running = false;
         }
-    }
-
-    public void createBlock(Graphics g){
-        for (int i = 0; i < SCREEN_WIDTH/UNIT_SIZE/2; i++) {
-            g.setColor(Color.red);
-            blocks.add(new Block(i*UNIT_SIZE*2,0));
-            g.fillRect(i*UNIT_SIZE*2,0,40,25);
-        }
+        ballX += gradientX * BALL_UNIT;
+        ballY += gradientY * BALL_UNIT;
     }
 
     public void move(int type) {
@@ -162,6 +189,7 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void gameOver(Graphics g) {
+        g.drawString("Game Over",300,300);
 
     }
 
@@ -197,8 +225,13 @@ public class GamePanel extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        time++;
         if (running) {
+            if (time % 100 == 0){
+                for (Block block : blocks){
+                    block.blockY += BALL_UNIT;
+                }
+            }
             moveBall();
         }
         repaint();
