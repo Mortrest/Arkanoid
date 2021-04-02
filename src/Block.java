@@ -22,4 +22,11 @@ public class Block {
             power = random.nextInt(8);
         }
     }
+    Block(int x, int y, int power, int type, boolean visible){
+        this.blockX = x;
+        this.blockY = y;
+        this.power = power;
+        this.type = type;
+        this.visible = visible;
+    }
 }
