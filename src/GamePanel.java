@@ -1,24 +1,23 @@
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class GamePanel extends JPanel implements ActionListener {
     static final int SCREEN_WIDTH = 600;
     static final int SCREEN_HEIGHT = 600;
     static final int UNIT_SIZE = 25;
-    static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
     static final int DELAY = 50;
     static final int BLOCK_WIDTH = 40;
     static final int BLOCK_HEIGHT = 25;
     final int[] shipX = new int[7];
     final int BALL_WIDTH = 15;
     final int BALL_HEIGHT = 15;
+    String name;
     ModelLoader ml = new ModelLoader();
     Ball ball1 = new Ball(1);
     Ball ball2 = new Ball(1);
@@ -41,7 +40,7 @@ public class GamePanel extends JPanel implements ActionListener {
     Timer timer;
     boolean savePage = false;
     JButton saveBtn = new JButton("Save");
-    JButton[] loads = new JButton[5];
+    JButton[] loads = new JButton[10];
     JButton sBTN = new JButton("New save");
     GamePanel(String str){
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
@@ -59,9 +58,7 @@ public class GamePanel extends JPanel implements ActionListener {
         sBTN.setBounds(300-145/2,600-150,160,50);
         sBTN.setVisible(false);
         this.add(sBTN);
-        System.out.println(ml.howManyFiles());
         String[] names = ml.names();
-        System.out.println(Arrays.toString(names));
         for (int i = 0; i < ml.howManyFiles(); i++) {
             loads[i] = new JButton(names[i]);
             loads[i].setName(names[i]);
@@ -75,6 +72,7 @@ public class GamePanel extends JPanel implements ActionListener {
         }
         Scanner ss = new Scanner(str);
         ss.next();points = ss.nextInt();
+        ss.next();name = ss.next();
         ss.next();shipSize = ss.nextInt();
         ss.next();BALL_UNIT = ss.nextInt();
         ss.next();health = ss.nextInt();
@@ -142,6 +140,7 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
         this.addKeyListener(new MyKey());
+        this.name=JOptionPane.showInputDialog(this,"Enter Name");
         saveBtn.addActionListener(this);
         this.add(saveBtn);
         saveBtn.setVisible(false);
@@ -153,9 +152,7 @@ public class GamePanel extends JPanel implements ActionListener {
         sBTN.setBounds(300-145/2,600-150,160,50);
         sBTN.setVisible(false);
         this.add(sBTN);
-        System.out.println(ml.howManyFiles());
         String[] names = ml.names();
-        System.out.println(Arrays.toString(names));
         for (int i = 0; i < ml.howManyFiles(); i++) {
             loads[i] = new JButton(names[i]);
             loads[i].setName(names[i]);
@@ -177,7 +174,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public String saveGame(){
         StringBuilder str = new StringBuilder();
-        str.append("points " + points +"\nShipSize " + shipSize + "\nBallUNIT " + BALL_UNIT + "\nHealth "+
+        str.append("points " + points + "\nName " + name +"\nShipSize " + shipSize + "\nBallUNIT " + BALL_UNIT + "\nHealth "+
                 health + "\ntime " + time + "\nshipTime " + shipTime + "\ndizzTime " + dizzyTime + "\nspeedTime " + speedTime
                 + "\nrunning " + running + "\ndizzy " + dizzy + "\npaused " + !paused + "\ndirection " + direction );
         str.append("\nshipX " + shipX.length + "\n");
@@ -212,17 +209,22 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        draw(g);
+        try {
+            draw(g);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void draw(Graphics g) {
+    public void draw(Graphics g) throws InterruptedException {
         if (gameOver){
             g.setColor(Color.white);
             g.setFont(new Font("Ink Free", Font.BOLD, 20));
             FontMetrics metrics1 = getFontMetrics(g.getFont());
             g.drawString("Gameover", (SCREEN_WIDTH - metrics1.stringWidth("Gameover")) / 2, g.getFont().getSize() + 400);
-            Scanner ss = new Scanner(System.in);
-            ss.next();
+            ml.archive(name,points);
+            Thread.sleep(1000);
+            System.exit(0);
         }
         else if (!paused) {
             saveBtn.setVisible(false);
@@ -483,10 +485,6 @@ public class GamePanel extends JPanel implements ActionListener {
         return true;
     }
 
-    public void gameOver(Graphics g) {
-        g.drawString("Game Over", 300, 300);
-
-    }
 
     public class MyKey extends KeyAdapter {
         @Override
@@ -644,8 +642,7 @@ public class GamePanel extends JPanel implements ActionListener {
                 }
             }
         }
-        else {
-        }
+
         repaint();
 
     }

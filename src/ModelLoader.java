@@ -1,13 +1,5 @@
-
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.file.Files;
-import java.time.LocalTime;
-import java.util.LinkedList;
-import java.util.Scanner;
 
 public class ModelLoader {
     private final File userDirectory;
@@ -33,8 +25,19 @@ public class ModelLoader {
         } catch (Exception e) {
             System.out.println(e);
         }
-
     }
+
+    public void archive(String name,int point) {
+        try {
+            File player = new File(userDirectory.getPath() + "\\" + "archive" + ".txt");
+            PrintStream printStream = new PrintStream(new FileOutputStream(player, true));
+            printStream.append(name + " " + point + "\n");
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
 
     public String[] names(){
         File directory = new File(userDirectory.getAbsolutePath());

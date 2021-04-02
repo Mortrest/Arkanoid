@@ -6,7 +6,7 @@ public class GameFrame extends JFrame {
     ModelLoader ml = new ModelLoader();
     GameFrame() throws IOException {
 
-        this.add(new GamePanel(ml.getUserFile("1617344930559.txt")));
+        this.add(new GamePanel());
         this.setTitle("Arkanoid");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
@@ -23,8 +23,9 @@ public class GameFrame extends JFrame {
         this.setVisible(true);
         this.setLocationRelativeTo(null);
     }
-    GameFrame(String str){
-        this.add(new Leaderboard());
+    GameFrame(String str) throws IOException {
+
+        this.add(new GamePanel(str));
         this.setTitle("Arkanoid");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
