@@ -3,9 +3,9 @@ public class Ball {
     int y;
     final int UNIT_SIZE = 25;
     final int SCREEN_WIDTH = 600;
-    int gradientX;
+    double gradientX;
     int fireTime = 0;
-    int gradientY;
+    double gradientY;
     boolean isAlive;
     boolean isFireBall;
 
